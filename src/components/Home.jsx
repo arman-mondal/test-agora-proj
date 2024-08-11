@@ -25,30 +25,33 @@ const Home = ({loggedInUser, users}) => {
   const [showOptionsForUser, setShowOptionsForUser] = useState(null);
   const filteredUsers = users.filter(user => user.key !== loggedInUser.key);
 
-  const url = 'https://agroratoken.onrender.com';
+  const url = 'https://test-agora-backend.onrender.com';
 
   useEffect(() => {
-    async function fetchData() {
-      const {data} = await axios.get(
-        `${url}/access_token?channelName=${loggedInUser.email}&role=PUBLISHER&uid=123`,
-      );
-      console.log('hello')
-      console.log(data.token)
-       setAgoraToken(data.token);
-    }
-    fetchData();
+   
   }, [agoraToken]);
-
-  const goLive = () => {
+  async function fetchData(channelName) {
+    const {data} = await axios.get(
+      `${url}/generate_token?channelName=${channelName}`,
+    );
+    console.log('hello')
+    console.log(data.token)
+    setAgoraToken(data.token);
+    return data.token;
+  }
+  const goLive = async() => {
+    const token = await fetchData(loggedInUser.email);
     navigation.navigate('Live', {
       channel: loggedInUser.email,
-      token: agoraToken,
+      token: token,
     });
   };
 
-  const joinLive = () => {
+  const joinLive = async() => {
     if (joinChannel!=='') {
-      navigation.navigate('Live', {channel: joinChannel, token: agoraToken});
+      const token = await fetchData(joinChannel);
+
+      navigation.navigate('Live', {channel: joinChannel, token: token});
     } else {
       Alert.alert('Please provide channel name');
     }
@@ -191,7 +194,17 @@ const Home = ({loggedInUser, users}) => {
                     </Text>
                   </Pressable>
                   <Pressable
-                    onPress={() => handleVideoCall(user.email)}
+                    onPress={async() => {
+                
+                     const token= await fetchData(user.email);
+                     if(token){
+                      navigation.navigate('Video', {
+                        user: user.email,
+                        token: token,
+                        appId: Values.App_ID,
+                      });
+                     }
+                    }}
                     style={{
                       backgroundColor: 'green',
                       borderWidth: 1,

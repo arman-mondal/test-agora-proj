@@ -14,7 +14,7 @@ const Video = () => {
   const [videoCall, setVideoCall] = useState(true);
 
   const connectionData = {
-    appId:'cfa9cd79da0e478084f0e2cecaec9972',
+    appId:appId,
     channel: user,
     token: token,
     
