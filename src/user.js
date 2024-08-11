@@ -29,4 +29,9 @@ export const users = [
     email: 'dummy5@example.com',
     password: '12345',
   },
+  {
+    key: 7,
+    email: 'arman',
+    password:'arman',
+  },
 ];

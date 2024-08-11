@@ -8,6 +8,8 @@ import {
   Dimensions,
   ScrollView,
   Alert,
+  Pressable,
+  Button,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
@@ -18,7 +20,9 @@ import axios from 'axios';
 const Home = ({loggedInUser, users}) => {
   const navigation = useNavigation();
   const [joinChannel, setJoinChannel] = useState('');
-  const [agoraToken, setAgoraToken] = useState(Values.temp_token);
+  const [agoraToken, setAgoraToken] = useState('');
+  const [show, setShow] = useState(false);
+  const [showOptionsForUser, setShowOptionsForUser] = useState(null);
   const filteredUsers = users.filter(user => user.key !== loggedInUser.key);
 
   const url = 'https://agroratoken.onrender.com';
@@ -28,26 +32,47 @@ const Home = ({loggedInUser, users}) => {
       const {data} = await axios.get(
         `${url}/access_token?channelName=${loggedInUser.email}&role=PUBLISHER&uid=123`,
       );
-      await setAgoraToken(data.token);
+      console.log('hello')
+      console.log(data.token)
+       setAgoraToken(data.token);
     }
     fetchData();
-  }, []);
+  }, [agoraToken]);
 
   const goLive = () => {
-    navigation.navigate('Video', {
+    navigation.navigate('Live', {
       channel: loggedInUser.email,
       token: agoraToken,
     });
   };
 
   const joinLive = () => {
-    if (joinChannel) {
-      navigation.navigate('Video', {channel: joinChannel, token: agoraToken});
+    if (joinChannel!=='') {
+      navigation.navigate('Live', {channel: joinChannel, token: agoraToken});
     } else {
       Alert.alert('Please provide channel name');
     }
   };
+  const toggleOptionsForUser = userKey => {
+    setShowOptionsForUser(prevUserKey =>
+      prevUserKey === userKey ? null : userKey,
+    );
+  };
 
+  const handleVideoCall = user => {
+    navigation.navigate('Video', {
+      user: user,
+      token: agoraToken,
+      appId: Values.App_ID,
+    });
+  };
+  const handleAudioCall = user => {
+    navigation.navigate('Audio', {
+      user: user,
+      token: agoraToken,
+      appId: Values.App_ID,
+    });
+  };
   return (
     <ScrollView style={{}}>
       <View>
@@ -92,7 +117,7 @@ const Home = ({loggedInUser, users}) => {
             borderRadius: 30,
             borderColor: '#000',
             borderWidth: 1,
-
+            color: '#000',
             paddingVertical: 8,
             paddingHorizontal: 10,
           }}
@@ -128,24 +153,70 @@ const Home = ({loggedInUser, users}) => {
         <Text style={styles.subtitle}>Users:</Text>
         <View style={{alignItems: 'center'}}>
           {filteredUsers.map((user, index) => (
-            <TouchableOpacity
-              key={index}
-              style={{
-                borderWidth: 1,
-                marginTop: 5,
-                paddingHorizontal: 30,
-                paddingVertical: 5,
-                borderRadius: 20,
-                marginBottom: 10,
-              }}>
-              <Text
-                key={user.key}
-                style={{color: '#000', fontSize: 16, fontWeight: '500'}}>
-                {user.email}
-              </Text>
-            </TouchableOpacity>
+            <View style={{flex: 1}} key={index}>
+              <TouchableOpacity
+                onPress={() => toggleOptionsForUser(user.key)}
+                style={{
+                  borderWidth: 1,
+                  marginTop: 5,
+                  paddingHorizontal: 35,
+                  paddingVertical: 10,
+                  borderRadius: 20,
+                  marginBottom: 10,
+                }}>
+                <Text
+                  style={{
+                    color: '#000',
+                    fontSize: 16,
+                    fontWeight: '500',
+                    paddingVertical: 1,
+                  }}>
+                  {user.email}
+                </Text>
+              </TouchableOpacity>
+              {showOptionsForUser === user.key && (
+                <View style={{flex: 1, flexDirection: 'row', gap: 40}}>
+                  <Pressable
+                    onPress={() => handleAudioCall(user.email)}
+                    style={{
+                      backgroundColor: 'blue',
+                      borderWidth: 1,
+                      borderRadius: 20,
+                      paddingHorizontal: 25,
+                      paddingVertical: 8,
+                    }}>
+                    <Text
+                      style={{color: '#fff', fontWeight: '500', fontSize: 15}}>
+                      Audio
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => handleVideoCall(user.email)}
+                    style={{
+                      backgroundColor: 'green',
+                      borderWidth: 1,
+                      borderRadius: 20,
+                      paddingHorizontal: 25,
+                      paddingVertical: 8,
+                      alignItems: 'center',
+                    }}>
+                    <Text
+                      style={{color: '#fff', fontWeight: '500', fontSize: 15}}>
+                      Video
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+            </View>
           ))}
         </View>
+      </View>
+
+      <View style={{marginTop: 20}}>
+        <Button
+          title="Join"
+          onPress={() => navigation.navigate('LiveScreen',{channel: loggedInUser.email, token: agoraToken})}
+        />
       </View>
     </ScrollView>
   );
