@@ -11,19 +11,22 @@ import {
   Pressable,
   Button,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {useNavigation} from '@react-navigation/native';
 const {height} = Dimensions.get('screen');
 import {Values} from '../../utils/Constants';
 import axios from 'axios';
-
-const Home = ({loggedInUser, users}) => {
+import { GlobalContext } from '../hooks/Wrapper';
+import {users} from '../user';
+import requestCameraAndAudioPermission from './Permission';
+const Home = ({}) => {
+  const {balance,loggedInUser, setLoggedInUser}=useContext(GlobalContext)
   const navigation = useNavigation();
   const [joinChannel, setJoinChannel] = useState('');
   const [agoraToken, setAgoraToken] = useState('');
   const [show, setShow] = useState(false);
   const [showOptionsForUser, setShowOptionsForUser] = useState(null);
-  const filteredUsers = users.filter(user => user.key !== loggedInUser.key);
+  const filteredUsers = users;
 
   const url = 'https://test-agora-backend.onrender.com';
 
@@ -80,6 +83,13 @@ const Home = ({loggedInUser, users}) => {
     <ScrollView style={{}}>
       <View>
         <Text style={styles.title}>Welcome, {loggedInUser.email}!</Text>
+        
+        <Text style={styles.title}>Balance, {balance}Rs</Text>
+        <Button onPress={()=>
+          {
+            console.log(balance)
+          }
+        } title="Check"/>
       </View>
       <TouchableOpacity
         onPress={goLive}
@@ -180,7 +190,20 @@ const Home = ({loggedInUser, users}) => {
               {showOptionsForUser === user.key && (
                 <View style={{flex: 1, flexDirection: 'row', gap: 40}}>
                   <Pressable
-                    onPress={() => handleAudioCall(user.email)}
+                    onPress={async() => {
+                      const token=await fetchData(user.email);
+                      if(token){
+                        navigation.navigate('Audio', {
+                          user: user.email,
+                          token: token,
+                          appId: Values.App_ID,
+                        });
+                      }
+                      else{
+                        Alert.alert('Token not generated');
+                      }
+
+                    }}
                     style={{
                       backgroundColor: 'blue',
                       borderWidth: 1,
@@ -197,6 +220,7 @@ const Home = ({loggedInUser, users}) => {
                     onPress={async() => {
                 
                      const token= await fetchData(user.email);
+                     requestCameraAndAudioPermission();
                      if(token){
                       navigation.navigate('Video', {
                         user: user.email,

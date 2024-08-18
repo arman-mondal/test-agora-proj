@@ -9,12 +9,14 @@ import Video from '../components/Video';
 import Audio from '../components/Audio';
 import NewAgora from '../components/NewAgora';
 import LiveScreen from '../components/LiveScreen';
+import { GlobalProvider } from '../hooks/Wrapper';
 
 const AppNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
+   <GlobalProvider>
+     <NavigationContainer>
+      <Stack.Navigator initialRouteName='Login'>
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Live" component={Live} />
@@ -24,6 +26,7 @@ const AppNavigator = () => {
         <Stack.Screen name="LiveScreen" component={LiveScreen} />
       </Stack.Navigator>
     </NavigationContainer>
+   </GlobalProvider>
   );
 };
 

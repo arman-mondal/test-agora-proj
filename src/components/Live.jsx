@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {SafeAreaView, StyleSheet} from 'react-native';
+import {SafeAreaView, StyleSheet,Text} from 'react-native';
 import AgoraUIKit from 'agora-rn-uikit';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {Values} from '../../utils/Constants';

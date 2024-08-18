@@ -1,11 +1,12 @@
 import {StyleSheet, Text, View, TextInput, Button, Alert} from 'react-native';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {users} from '../user';
 import {useNavigation} from '@react-navigation/native';
 import Home from './Home';
+import { GlobalContext } from '../hooks/Wrapper';
 
 const Login = () => {
-  const [loggedInUser, setLoggedInUser] = useState(null);
+  const {AddBalance, decreaseBalance,balance,loggedInUser, setLoggedInUser} = useContext(GlobalContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const handleLogin = (email, password) => {
@@ -14,7 +15,9 @@ const Login = () => {
     );
     if (user) {
       setLoggedInUser(user);
-      Alert.alert('Login Successful');
+      AddBalance(user.balance);
+
+      Alert.alert('Login Successful'+balance);
     } else {
       Alert.alert('Invalid email or password');
     }
